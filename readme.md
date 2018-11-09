@@ -62,17 +62,12 @@ Having said the above, there are some nice/elegant/simple entry points into ray 
 
 ## Let's begin!
 ### 0. ShaderToy
-To save your work, create an account on ShaderToy. Click "New" in the top right to create a new shader. You will be presented with the real-time shader output on the left, and the pixel shader code on the right.
+ShaderToy is a shader creation website and platform for browsing, sharing and discussing shaders.
 
-Take a minute to look over the auto-generated code. ShaderToy defines several useful variables for you, see their names and types by clicking on the "Shader Inputs" bar.
+Create an account on ShaderToy (it's fast/easy/free) by heading here: https://www.shadertoy.com/signin. This will allow you to save your shader and ensure that you don't lose work.
 
-![](/assets/0-shader-toy.png)
+To get started, we recomend following a tutorial such as this one from @The_ArtOfCode: https://www.youtube.com/watch?v=u5HAYVHsasc . The basics here are necessary to follow the rest of the workshop.
 
-- vector swizzling
-- vec4
-- in out params
-- fragColor
-- ...
 
 ### Live 2D SDF demo!
 
