@@ -71,12 +71,60 @@ To get started, we recomend following a tutorial such as this one from @The_ArtO
 
 ### Live 2D SDF demo!
 
+We provide a simple framework for defining 2D signed distance fields.
+
+https://www.shadertoy.com/view/llcBD2
+
+This can look like the following when filled in. Green denotes 'outside' surfaces, red denotes 'inside' surfaces, the white line delineates the surface itself, and the shading in the inside/outside regions illustrates distance iso-lines - lines at fixed distances.
+
 ![](/assets/0-SDF-demo.jpg)
 
-See shader here: https://www.shadertoy.com/view/llcBD2
+The goal of this section is to design a SDF that gives the desired scene shape (white outline). In code this distance is computed by the ```sdf()``` function, which is provided a 2D position in space. The concepts learn here will generalise directly to 3D space and will allow you to model a 3D scene.
 
-Primitives reference: http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
-Extended introduction to building scenes with SDFs: https://www.youtube.com/watch?v=s8nFqwOho-s
+Start simple - try first to just use the x or y component of the point ```p``` and observe the result:
+
+```
+float sdf(vec2 p)
+{
+    return p.y;
+}
+```
+
+What kind of scene does this simple distance field represent?
+
+Another good thing to try is to use distances, for example: ```return length(p);```. This length of ```p``` gives a distance field that gives the distance to the origin. This could give the distance .
+
+A point is not a very interesting thing to render as a point is infinitely small, and our rays would always miss it. We can give the point some area by subtracting the desired radius from the distance: ```return length(p) - 0.25;```. A final extension is to change the point from which we compute the distance: ```length(p - vec3(0.0, 0.2, 0.0)) - 0.25;```. What effect does this have on the shape?
+
+Congratulations - you have just modelled a circle using mathematics :). This will trivially extend to 3D in which case it models a sphere. Contrast this scene representation to other 'explicit' scenes representations such as triangle meshes or NURBS surfaces. We created a sphere in minutes with a single line of code, and our code directly maps to one mathematical definition for a sphere - 'the set of all points that are equidistant from a center point'.
+
+For other types of primitives, the distance functions are similarly elegant. iq made a great reference page with images: http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
+
+Once you understand how a distance to a primitive works - put it in a box - define a function for it so you don't need to remember and write out the code each time. There is a function already defined for the circle ```sdCircle()``` which you can find in the shader. Add any primitives you wish.
+
+### Combining shapes
+Now we know how to create individual primitives, how can we combine them to define a scene with multiple shapes?
+
+One way to do this is the 'union' operator - which is defined as the minimum of two distances. It's best to experiment with the code in order to get a strong grasp of this, but the intuition is that the SDF gives the distance to the nearest surface, and if the scene has multiple objects you want the distance to the closest object, which will be the minimum of the distance to each object.
+
+In code this may look as follows:
+
+```
+float sdf(vec2 p)
+{
+    float d = 1000.;
+    
+    d = min(d, sdCircle(p, vec2(-0.1, 0.4), 0.15));
+    d = min(d, sdCircle(p, vec2( 0.5, 0.1), 0.35));
+    
+    return d;
+}
+```
+
+In this way we can compactly combine many shapes. Once this is understood the ```opU()``` function should be used, which stands for 'operation union'.
+
+This is only scratching the surface of what is possible. We can get smooth blends using a fancy soft min function - try using ```opBlend()```. There are many other interesting techniques that can be applied, the interested reader is referred to this extended introduction to building scenes with SDFs: https://www.youtube.com/watch?v=s8nFqwOho-s
+
 
 ## 1. Ray marching loop
 Here's the basic idea of how we'll implement ray marching (in pseudo code):
