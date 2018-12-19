@@ -85,7 +85,7 @@ float sdf(vec2 p)
 
 The result should look as follows:
 
-
+![](/assets/0-SDF-horizontal.png)
 
 Green denotes 'outside' surfaces, red denotes 'inside' surfaces, the white line delineates the surface itself, and the shading in the inside/outside regions illustrates distance iso-lines - lines at fixed distances. In 2D this SDF models a horizontal line in 2D at `y=0`. What sort of geometric primitive would this represent in 3D?
 
