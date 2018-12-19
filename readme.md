@@ -30,7 +30,7 @@ By using an SDF, the geometry for this scene didn't have to be created in a DCC 
 
 Other graphical effects are made simpler by raymarching when compared with the traditional rasterization alternatives. Subsurface scattering, for instance, requires simply sending a few extra rays into the surface to see how thick it is. Ambient occlusion, anti-aliasing, and depth of field are three other techniques which require just a few extra lines and yet greatly improve the image quality.
 
-### Raymarching Distance Fields
+### Raymarching distance fields
 We will march along each ray and look for an intersection with a surface in the scene. One way to do this would be to start at the ray origin (on the camera plane), and take uniform steps along the ray, evaluating the distance field at each point. When the distance to the scene is less than a threshold value, we know we have hit a surface and we therefore we can then terminate the raymarch and shade that pixel.
 
 A more efficient approach is to actually use the sampled distance to the scene at each point along the ray to determine the next step size. As mentioned above, the distance can be regarded as the radius of a sphere of empty space around each point. It is therefore safe to step by this amount because we know we will not pass through any surfaces.
@@ -45,7 +45,7 @@ Once this distance is below a certain threshold we can stop iterating and shade 
 
 Play around with this shader in your browser here: https://www.shadertoy.com/view/lslXD8
 
-### Comparison to Ray Tracing
+### Comparison to ray tracing
 At this point one might ask why we don't just compute the intersection with the scene directly using analytic mathematics, using a technique referred to as Ray Tracing. This is how offline renders would typically work - all the triangles in the scene are indexed into some kind of spatial data structure like a Bounding Volume Hierarchy (BVH) or kD-tree, which allow efficient intersection of triangles situated along a ray.
 
 We raymarch distance fields instead because:
@@ -453,7 +453,7 @@ What limitations do you see with this approach?
 
 
 
-### Triplanar Mapping
+### Triplanar mapping
 
 A more advanced way to map textures is to do 3 projections from the primary axes, and then blend the result using triplanar mapping. The goal of the blending is to pick the best texture for each point on the surface. One possibility is to define the blend weights based on the alignment of the surface normal with each world axis. A surface that faces front on with one of the axes will receive a large blend weight:
 
