@@ -61,9 +61,10 @@ Having said the above, there are some nice/elegant/simple entry points into ray 
 ### 0. ShaderToy
 ShaderToy is a shader creation website and platform for browsing, sharing and discussing shaders.
 
-Create an account on ShaderToy (it's fast/easy/free) by heading here: https://www.shadertoy.com/signin. This will allow you to save your shader and ensure that you don't lose work.
+While you can jump straight in and start writing a new shader without creating an account, this is dangerous as you can easily lose work if there are connection issues or if you hange the GPU (easily done by e.g. creating an infinite loop).
+Therefore we strongly recommend creating an account (it's fast/easy/free) by heading here: https://www.shadertoy.com/signin, and saving regularly.
 
-To get started, we recomend following a tutorial such as this one from @The_ArtOfCode: https://www.youtube.com/watch?v=u5HAYVHsasc. The basics here are necessary to follow the rest of the workshop.
+For a ShaderToy overview and getting started guide, we recomend following a tutorial such as this one from @The_ArtOfCode: https://www.youtube.com/watch?v=u5HAYVHsasc. The basics here are necessary to follow the rest of the workshop.
 
 
 ### 2D SDF demo
@@ -89,10 +90,13 @@ The result should look as follows:
 
 Green denotes 'outside' surfaces, red denotes 'inside' surfaces, the white line delineates the surface itself, and the shading in the inside/outside regions illustrates distance iso-lines - lines at fixed distances. In 2D this SDF models a horizontal line in 2D at `y=0`. What sort of geometric primitive would this represent in 3D?
 
-
 Another good thing to try is to use distances, for example: `return length(p);`. This operator returns the magnitude of the vector, and in this case it's giving us the current point's distance to the origin.
 
-A point is not a very interesting thing to render as a point is infinitesimal, and our rays would always miss it. We can give the point some area by subtracting the desired radius from the distance: `return length(p) - 0.25;`. A final extension is to change the point from which we compute the distance: `length(p - vec3(0.0, 0.2, 0.0)) - 0.25;`. What effect does this have on the shape? What values might the function be returning for points 'inside' the circle?
+A point is not a very interesting thing to render as a point is infinitesimal, and our rays would always miss it!
+We can give the point some area by subtracting the desired radius from the distance: `return length(p) - 0.25;`.
+A final extension is to change the point from which we compute the distance: `length(p - vec3(0.0, 0.2, 0.0)) - 0.25;`.
+What effect does this have on the shape?
+What values might the function be returning for points 'inside' the circle?
 
 Congratulations - you have just modelled a circle using mathematics :). This will trivially extend to 3D in which case it models a sphere. Contrast this scene representation to other 'explicit' scenes representations such as triangle meshes or NURBS surfaces. We created a sphere in minutes with a single line of code, and our code directly maps to one mathematical definition for a sphere - 'the set of all points that are equidistant from a center point'.
 
