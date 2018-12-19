@@ -72,11 +72,7 @@ We provide a simple framework for defining and visualizing 2D signed distance fi
 
 https://www.shadertoy.com/view/llcBD2
 
-This can look like the following when filled in. Green denotes 'outside' surfaces, red denotes 'inside' surfaces, the white line delineates the surface itself, and the shading in the inside/outside regions illustrates distance iso-lines - lines at fixed distances.
-
-![](/assets/0-SDF-demo.jpg)
-
-The goal of this section is to design a SDF that gives the desired scene shape (white outline). In code this distance is computed by the `sdf()` function, which is provided a 2D position in space. The concepts you learn here will generalise directly to 3D space and will allow you to model a 3D scene.
+Prior to defining the distance field the result will be all white. The goal of this section is to design an SDF that gives the desired scene shape (white outline). In code this distance is computed by the `sdf()` function, which is provided a 2D position in space. The concepts you learn here will generalise directly to 3D space and will allow you to model a 3D scene.
 
 Start simple - try first to just use the x or y component of the point `p` and observe the result:
 
@@ -87,7 +83,12 @@ float sdf(vec2 p)
 }
 ```
 
-What kind of scene does this simple distance field represent?
+The result should look as follows:
+
+
+
+Green denotes 'outside' surfaces, red denotes 'inside' surfaces, the white line delineates the surface itself, and the shading in the inside/outside regions illustrates distance iso-lines - lines at fixed distances. In 2D this SDF models a horizontal line in 2D at `y=0`. What sort of geometric primitive would this represent in 3D?
+
 
 Another good thing to try is to use distances, for example: `return length(p);`. This operator returns the magnitude of the vector, and in this case it's giving us the current point's distance to the origin.
 
@@ -121,6 +122,10 @@ float sdf(vec2 p)
 In this way we can compactly combine many shapes. Once this is understood, the `opU()` function should be used, which stands for 'operation union'.
 
 This is only scratching the surface of what is possible. We can get smooth blends using a fancy soft min function - try using the provided `opBlend()`. There are many other interesting techniques that can be applied, the interested reader is referred to this extended introduction to building scenes with SDFs: https://www.youtube.com/watch?v=s8nFqwOho-s
+
+Example:
+
+![](/assets/0-SDF-demo.jpg)
 
 
 ## 1. Transition to 3D
