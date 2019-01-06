@@ -54,7 +54,7 @@ We raymarch distance fields instead because:
 - We don't need to author the explicit scene representation - triangle meshes, tex coords, colours, etc
 - We benefit from a range of useful features of distance fields, some of which are mentioned above
 
-Having said the above, there are some nice/elegant/simple entry points into ray tracing. [The Ray Tracing in One Weekend free book](http://in1weekend.blogspot.com/2016/01/ray-tracing-in-one-weekend.html) (and [subsequent](http://in1weekend.blogspot.com/2016/01/ray-tracing-second-weekend.html) [chapters](http://in1weekend.blogspot.com/2016/03/ray-tracing-rest-of-your-life.html)) are very highly recommended and are essential reading for anyone interested in graphics.
+Having said the above, there are some elegant/simple entry points into ray tracing. The [Ray Tracing in One Weekend free book](http://in1weekend.blogspot.com/2016/01/ray-tracing-in-one-weekend.html) (and [subsequent](http://in1weekend.blogspot.com/2016/01/ray-tracing-second-weekend.html) [chapters](http://in1weekend.blogspot.com/2016/03/ray-tracing-rest-of-your-life.html)) are very highly recommended and are essential reading for anyone interested in graphics.
 
 
 ## Let's begin!
@@ -71,7 +71,7 @@ For a ShaderToy overview and getting started guide, we recomend following a tuto
 
 We provide a simple framework for defining and visualizing 2D signed distance fields.
 
-https://www.shadertoy.com/view/llcBD2
+https://www.shadertoy.com/view/Wsf3Rj
 
 Prior to defining the distance field the result will be entirely white. The goal of this section is to design an SDF that gives the desired scene shape (white outline). In code this distance is computed by the `sdf()` function, which is given a 2D position in space as input. The concepts you learn here will generalise directly to 3D space and will allow you to model a 3D scene.
 
@@ -94,7 +94,7 @@ Another good thing to try is to use distances, for example: `return length(p);`.
 
 A point is not a very interesting thing to render as a point is infinitesimal, and our rays would always miss it!
 We can give the point some area by subtracting the desired radius from the distance: `return length(p) - 0.25;`.
-A final extension is to change the point from which we compute the distance: `length(p - vec3(0.0, 0.2, 0.0)) - 0.25;`.
+We can also modify the input point prior to taking its magnitude: `length(p - vec3(0.0, 0.2, 0.0)) - 0.25;`.
 What effect does this have on the shape?
 What values might the function be returning for points 'inside' the circle?
 
@@ -138,7 +138,7 @@ Hopefully you've gained a basic understanding of how distance fields can be used
 We reccommend saving your current shader and starting a new one so that you can refer back to your 2D visualization later. Most of the helpers can copied into your new shader and made to work in 3D by swapping the `vec2`s with `vec3`s.
 
 ### Ray marching loop
-Rather than visualize the SDF like we did in 2D, we're going to jump right in to rendering the scene. Here's the basic idea of how we'll implement ray marching (in pseudo code):
+Rather than visualise the SDF like we did in 2D, we're going to jump right in to rendering the scene. Here's the basic idea of how we'll implement ray marching (in pseudo code):
 
 ```
 Main
@@ -651,7 +651,7 @@ Also give the references a read through if you're interested in learning more!
 
 
 
-Thanks for participating! Be sure to send me your cool shaders! If you have any feedback on the course I'd also love to hear it!
+Thanks for reading! Be sure to send us your cool shaders! If you have any feedback on the course we'd also love to hear it!
 
 Contact us on twitter [@liqwidice](https://twitter.com/liqwidice) & [@hdb1](https://twitter.com/hdb1)
 
