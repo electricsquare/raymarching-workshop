@@ -132,12 +132,12 @@ Example:
 ![](/assets/0-SDF-demo.jpg)
 
 
-## 1. Transition to 3D
+## Transition to 3D
 Hopefully you've gained a basic understanding of how distance fields can be used to represent scene data, and how we'll use raymarching to find intersection points with the scene. We're now going to start working in three dimensions, where the real magic happens.
 
 We reccommend saving your current shader and starting a new one so that you can refer back to your 2D visualization later. Most of the helpers can copied into your new shader and made to work in 3D by swapping the `vec2`s with `vec3`s.
 
-### 1.a. Ray marching loop
+### Ray marching loop
 Rather than visualize the SDF like we did in 2D, we're going to jump right in to rendering the scene. Here's the basic idea of how we'll implement ray marching (in pseudo code):
 
 ```
@@ -152,7 +152,7 @@ Render ray
 
 These steps will now each be described in more detail.
 
-### 1.b. Camera
+### Camera
 ```cpp
 vec3 getCameraRayDir(vec2 uv, vec3 camPos, vec3 camTarget)
 {
@@ -172,7 +172,7 @@ This function calculates the three axes of the camera's 'view' matrix (forward, 
 
 `fPersp` allows us to indirectly control our camera's field of view. You can think of this multiplication as moving the near plane closer and farther from the camera. Experiment with different values.
 
-### 1.c. Define scene
+### Scene definition
 ```cpp
 float sdSphere(vec3 p, float r)
 {
@@ -189,7 +189,7 @@ float sdf(vec3 pos)
 
 As you can see, we've added a `sdSphere()` which is identical to `sdCircle` save for the number of components in our input point.
 
-### 1.d. Raymarching
+### Raymarching
 Pseudo code:
 
 ```cpp
@@ -244,7 +244,7 @@ vec2 screenToWorld(vec2 screenCoord)
 
 
 
-### 1.e. Depth
+### Depth
 Lets display the distance to the scene to check we're on track. We'll scale and invert it to better see the differences.
 
 ```cpp
@@ -257,7 +257,7 @@ https://www.shadertoy.com/view/XltBzj
 
 
 
-### 1.f. Ambient
+### Ambient term
 To get some colour into the scene we're first going to differentiate between objects and the background.
 
 To do this, we can return -1 in castRay to signal nothing was hit. We can then handle that case in render.
@@ -289,7 +289,7 @@ https://www.shadertoy.com/view/4tdBzj
 
 
 
-### 1.g. Shading (diffuse)
+### Diffuse term
 To get more realistic lighting let's calculate the surface normal so we can calculate basic Lambertian lighting.
 
 To calculate the normal, we are going to calculate the gradient of the surface in all three axes.
@@ -373,7 +373,7 @@ float sdPlane(vec3 p, vec4 n)
 }
 ```
 
-### Soft Shadows
+### Soft shadows
 Shadows in real life don't immediately stop, they have some falloff, referred to as a penumbra. 
 
 We can model this by taking marching several rays from our surface point, each with slightly different directions.
@@ -412,11 +412,11 @@ for (float s = 0.0; s < shadowRayCount; s++)
 col = mix(col, col*0.2, shadow/shadowRayCount);
 ```
 
-## 2 Texturing
+## Texture mapping
 Rather than define a single surface colour (or other characteristic) uniformly over the entire surface, one can define patterns to apply to the surface using textures.
 We'll cover three ways of achieving this.
 
-### 3D
+### 3D Texture mapping
 There are volume textures readily accessible in shadertoy that can be assigned to a channel. Try sampling one of these textures using the 3D position of the surface point:
 
 // assign a 3D noise texture to iChannel0 and then sample based on world position
@@ -438,7 +438,7 @@ The constants/weights above are typically used for a fractal noise, but they can
 
 Try animating your object using iTime and observing how the volume texture behaves. Can this behaviour be changed?
 
-### 2D
+### 2D Texture mapping
 Applying a 2D texture is an interesting problem - how to project the texture onto the surface? In normal 3D graphics, each triangle in an object has one or more UVs assigned which provide the coordinates of the region of texture which should me mapped to the triangle (texture mapping). In our case we don't have UVs provided so we need to figure out how to sample the texture.
 
 One approach is to sample the texture using a top down world projection, by sampling the texture based on X & Z coordinates:
@@ -477,7 +477,7 @@ vec3 triplanarMap(vec3 surfacePos, vec3 normal)
 What limitations do you see with this approach?
 
 
-## 3. Materials
+## Materials
 Along with the distance we return from the castRay function, we can also return an index which represents the material of the object hit. We can use this index to colour objects accordingly.
 
 Our operators will need to take vec2s rather than floats, and compare the first component of each.
@@ -550,7 +550,6 @@ vec2 opBlend(vec2 d1, vec2 d2)
 
 ![](/assets/3-blending.png)
 
-## Advanced techniques
 ### Anti-aliasing
 By sampling the scene many times with slightly offset camera direction vectors, we can get an smoothed value which avoids aliasing.
 
@@ -621,7 +620,7 @@ Darker and lighter values can be accentuated, causing the perceived dynamic rang
 col = smoothstep(0.0,1.0,col);
 ```
 
-### "Ambient Occlusion"
+### "Ambient occlusion"
 If we take the inverse of the image shown above (in Optimizations), we can get a weird AO-like effect.
 
 ```cpp
