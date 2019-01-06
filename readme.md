@@ -5,7 +5,7 @@
 Brought to you by [Electric Square](https://www.electricsquare.com/)
 
 ### Overview
-Rendering images involves determining a colour for every pixel on the screen. To compute a colour one must determine what surface lies behind the pixel in the world, and then 'shade' it to compute a final colour.
+Rendering an image involves determining the colour of every pixel in the image, which requires figuring out what surface lies behind the pixel in the world, and then 'shading' it to compute a final colour.
 
 Current generation GPUs take triangle meshes as input, rasterise them into pixels (called _fragments_ before they're drawn to a display), and then shade them to calculate their contribution to the image. While this pipeline is currently ubiquitous, it is also complicated and not necessarily the best way to learn graphics.
 
@@ -14,7 +14,7 @@ An alternative approach is to cast a ray through each pixel and intersect it wit
 This course introduces one technique for raycasting through 'distance fields'. A distance field is a function that returns how close a given point is to the closest surface in the scene. This distance defines the radius of a sphere of empty space around each point. Signed distance fields (SDFs) are distance fields that are defined both inside and outside objects; if the queried position is 'inside' a surface, its distance will be reported as negative, otherwise it will be positive.
 
 ### What's possible with ray marching?
-The game 'Claybook' solely uses distance fields to represent the scene. This affords it a lot of interesting possibilities, like completely dynamic surface topologies and shape morphing. These effects would be very difficult to achieve with triangle meshes. Other benefits include high quality soft shadows and ambient occlusion.
+The game 'Claybook' solely uses distance fields to represent the scene. This affords it a lot of interesting possibilities, like completely dynamic surface topologies and shape morphing. These effects would be very difficult to achieve with triangle meshes. Other benefits include easy-to-implement and high-quality soft shadows and ambient occlusion.
 
 ![](/assets/0-claybook-01.gif)
 
@@ -26,24 +26,24 @@ The following image was also rendered in real-time using the techniques we'll co
 
 You can run it live in your browser here: https://www.shadertoy.com/view/ld3Gz2
 
-By using an SDF, the geometry for this scene didn't have to be created in a DCC like Maya, but instead is represented entirely parametrically. This makes it trivial to animate the shape by simply varying the inputs to the scene mapping function. 
+By using an SDF (signed distance field), the geometry for this scene didn't have to be created in a DCC like Maya, but instead is represented entirely parametrically. This makes it trivial to animate the shape by simply varying the inputs to the scene mapping function. 
 
 Other graphical effects are made simpler by raymarching when compared with the traditional rasterization alternatives. Subsurface scattering, for instance, requires simply sending a few extra rays into the surface to see how thick it is. Ambient occlusion, anti-aliasing, and depth of field are three other techniques which require just a few extra lines and yet greatly improve the image quality.
 
 ### Raymarching distance fields
 We will march along each ray and look for an intersection with a surface in the scene. One way to do this would be to start at the ray origin (on the camera plane), and take uniform steps along the ray, evaluating the distance field at each point. When the distance to the scene is less than a threshold value, we know we have hit a surface and we therefore we can then terminate the raymarch and shade that pixel.
 
-A more efficient approach is to actually use the sampled distance to the scene at each point along the ray to determine the next step size. As mentioned above, the distance can be regarded as the radius of a sphere of empty space around each point. It is therefore safe to step by this amount because we know we will not pass through any surfaces.
+A more efficient approach is to use the distance returned by the SDF to determine the next step size. As mentioned above, the distance returned by an SDF can be regarded as the radius of a sphere of empty space around the input point. It is therefore safe to step by this amount along the ray because we know we will not pass through any surfaces.
 
-In the following image each black dot represents where the scene was sampled. The ray is then marched along that distance (extending to the radius of the circle) and then resampled.
+In the following 2D representation of raymarching, each circle's center is where the scene was sampled from. The ray was then marched along that distance (extending to the radius of the circle), and then resampled.
 
 As you can see, sampling the SDF doesn't give you the exact intersection point of your ray, but rather a minimum distance you can travel without passing through a surface.
 
-Once this distance is below a certain threshold we can stop iterating and shade based on the surface we hit.
+Once this distance is below a certain threshold, the raymarch terminates the pixel can be shaded based on the properties of the surface intersected with.
 
 ![](/assets/0-SDF.png)
 
-Play around with this shader in your browser here: https://www.shadertoy.com/view/lslXD8
+Play around with this shader in your browser here: (click and drag in the image to set the ray direction) https://www.shadertoy.com/view/lslXD8
 
 ### Comparison to ray tracing
 At this point one might ask why we don't just compute the intersection with the scene directly using analytic mathematics, using a technique referred to as Ray Tracing. This is how offline renders would typically work - all the triangles in the scene are indexed into some kind of spatial data structure like a Bounding Volume Hierarchy (BVH) or kD-tree, which allow efficient intersection of triangles situated along a ray.
@@ -58,13 +58,13 @@ Having said the above, there are some nice/elegant/simple entry points into ray 
 
 
 ## Let's begin!
-### 0. ShaderToy
+### ShaderToy
 ShaderToy is a shader creation website and platform for browsing, sharing and discussing shaders.
 
-While you can jump straight in and start writing a new shader without creating an account, this is dangerous as you can easily lose work if there are connection issues or if you hange the GPU (easily done by e.g. creating an infinite loop).
+While you can jump straight in and start writing a new shader without creating an account, this is dangerous as you can easily lose work if there are connection issues or if you hang the GPU (easily done by e.g. creating an infinite loop).
 Therefore we strongly recommend creating an account (it's fast/easy/free) by heading here: https://www.shadertoy.com/signin, and saving regularly.
 
-For a ShaderToy overview and getting started guide, we recomend following a tutorial such as this one from @The_ArtOfCode: https://www.youtube.com/watch?v=u5HAYVHsasc. The basics here are necessary to follow the rest of the workshop.
+For a ShaderToy overview and getting started guide, we recomend following a tutorial such as this one from [@The_ArtOfCode](https://twitter.com/the_artofcode): https://www.youtube.com/watch?v=u5HAYVHsasc. The basics here are necessary to follow the rest of the workshop.
 
 
 ### 2D SDF demo
@@ -73,7 +73,7 @@ We provide a simple framework for defining and visualizing 2D signed distance fi
 
 https://www.shadertoy.com/view/llcBD2
 
-Prior to defining the distance field the result will be all white. The goal of this section is to design an SDF that gives the desired scene shape (white outline). In code this distance is computed by the `sdf()` function, which is provided a 2D position in space. The concepts you learn here will generalise directly to 3D space and will allow you to model a 3D scene.
+Prior to defining the distance field the result will be entirely white. The goal of this section is to design an SDF that gives the desired scene shape (white outline). In code this distance is computed by the `sdf()` function, which is given a 2D position in space as input. The concepts you learn here will generalise directly to 3D space and will allow you to model a 3D scene.
 
 Start simple - try first to just use the x or y component of the point `p` and observe the result:
 
