@@ -647,6 +647,8 @@ Thanks for participating! Be sure to send me your cool shaders! If you have any 
 
 Contact us on twitter [@liqwidice](https://twitter.com/liqwidice) & [@hdb1](https://twitter.com/hdb1)
 
+[Electric Square](https://www.electricsquare.com/careers/) is hiring!
+
 ---
 
 ### Recommended reading:
