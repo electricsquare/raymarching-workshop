@@ -5,7 +5,7 @@
 Brought to you by [Electric Square](https://www.electricsquare.com/)
 
 ### Overview
-Rendering images involves determining a colour for every pixel on the screen. To compute a colour one must determine what surface lies behind the pixel in the world, and then 'shade' it to compute a final colour.
+Rendering an image involves determining the colour of every pixel in the image, which requires figuring out what surface lies behind the pixel in the world, and then 'shading' it to compute a final colour.
 
 Current generation GPUs take triangle meshes as input, rasterise them into pixels (called _fragments_ before they're drawn to a display), and then shade them to calculate their contribution to the image. While this pipeline is currently ubiquitous, it is also complicated and not necessarily the best way to learn graphics.
 
@@ -14,7 +14,7 @@ An alternative approach is to cast a ray through each pixel and intersect it wit
 This course introduces one technique for raycasting through 'distance fields'. A distance field is a function that returns how close a given point is to the closest surface in the scene. This distance defines the radius of a sphere of empty space around each point. Signed distance fields (SDFs) are distance fields that are defined both inside and outside objects; if the queried position is 'inside' a surface, its distance will be reported as negative, otherwise it will be positive.
 
 ### What's possible with ray marching?
-The game 'Claybook' solely uses distance fields to represent the scene. This affords it a lot of interesting possibilities, like completely dynamic surface topologies and shape morphing. These effects would be very difficult to achieve with triangle meshes. Other benefits include high quality soft shadows and ambient occlusion.
+The game 'Claybook' solely uses distance fields to represent the scene. This affords it a lot of interesting possibilities, like completely dynamic surface topologies and shape morphing. These effects would be very difficult to achieve with triangle meshes. Other benefits include easy-to-implement and high-quality soft shadows and ambient occlusion.
 
 ![](/assets/0-claybook-01.gif)
 
@@ -26,26 +26,26 @@ The following image was also rendered in real-time using the techniques we'll co
 
 You can run it live in your browser here: https://www.shadertoy.com/view/ld3Gz2
 
-By using an SDF, the geometry for this scene didn't have to be created in a DCC like Maya, but instead is represented entirely parametrically. This makes it trivial to animate the shape by simply varying the inputs to the scene mapping function. 
+By using an SDF (signed distance field), the geometry for this scene didn't have to be created in a DCC like Maya, but instead is represented entirely parametrically. This makes it trivial to animate the shape by simply varying the inputs to the scene mapping function. 
 
 Other graphical effects are made simpler by raymarching when compared with the traditional rasterization alternatives. Subsurface scattering, for instance, requires simply sending a few extra rays into the surface to see how thick it is. Ambient occlusion, anti-aliasing, and depth of field are three other techniques which require just a few extra lines and yet greatly improve the image quality.
 
-### Raymarching Distance Fields
+### Raymarching distance fields
 We will march along each ray and look for an intersection with a surface in the scene. One way to do this would be to start at the ray origin (on the camera plane), and take uniform steps along the ray, evaluating the distance field at each point. When the distance to the scene is less than a threshold value, we know we have hit a surface and we therefore we can then terminate the raymarch and shade that pixel.
 
-A more efficient approach is to actually use the sampled distance to the scene at each point along the ray to determine the next step size. As mentioned above, the distance can be regarded as the radius of a sphere of empty space around each point. It is therefore safe to step by this amount because we know we will not pass through any surfaces.
+A more efficient approach is to use the distance returned by the SDF to determine the next step size. As mentioned above, the distance returned by an SDF can be regarded as the radius of a sphere of empty space around the input point. It is therefore safe to step by this amount along the ray because we know we will not pass through any surfaces.
 
-In the following image each black dot represents where the scene was sampled. The ray is then marched along that distance (extending to the radius of the circle) and then resampled.
+In the following 2D representation of raymarching, each circle's center is where the scene was sampled from. The ray was then marched along that distance (extending to the radius of the circle), and then resampled.
 
 As you can see, sampling the SDF doesn't give you the exact intersection point of your ray, but rather a minimum distance you can travel without passing through a surface.
 
-Once this distance is below a certain threshold we can stop iterating and shade based on the surface we hit.
+Once this distance is below a certain threshold, the raymarch terminates the pixel can be shaded based on the properties of the surface intersected with.
 
 ![](/assets/0-SDF.png)
 
-Play around with this shader in your browser here: https://www.shadertoy.com/view/lslXD8
+Play around with this shader in your browser here: (click and drag in the image to set the ray direction) https://www.shadertoy.com/view/lslXD8
 
-### Comparison to Ray Tracing
+### Comparison to ray tracing
 At this point one might ask why we don't just compute the intersection with the scene directly using analytic mathematics, using a technique referred to as Ray Tracing. This is how offline renders would typically work - all the triangles in the scene are indexed into some kind of spatial data structure like a Bounding Volume Hierarchy (BVH) or kD-tree, which allow efficient intersection of triangles situated along a ray.
 
 We raymarch distance fields instead because:
@@ -54,29 +54,26 @@ We raymarch distance fields instead because:
 - We don't need to author the explicit scene representation - triangle meshes, tex coords, colours, etc
 - We benefit from a range of useful features of distance fields, some of which are mentioned above
 
-Having said the above, there are some nice/elegant/simple entry points into ray tracing. [The Ray Tracing in One Weekend free book](http://in1weekend.blogspot.com/2016/01/ray-tracing-in-one-weekend.html) (and [subsequent](http://in1weekend.blogspot.com/2016/01/ray-tracing-second-weekend.html) [chapters](http://in1weekend.blogspot.com/2016/03/ray-tracing-rest-of-your-life.html)) are very highly recommended and are essential reading for anyone interested in graphics.
+Having said the above, there are some elegant/simple entry points into ray tracing. The [Ray Tracing in One Weekend free book](http://in1weekend.blogspot.com/2016/01/ray-tracing-in-one-weekend.html) (and [subsequent](http://in1weekend.blogspot.com/2016/01/ray-tracing-second-weekend.html) [chapters](http://in1weekend.blogspot.com/2016/03/ray-tracing-rest-of-your-life.html)) are very highly recommended and are essential reading for anyone interested in graphics.
 
 
 ## Let's begin!
-### 0. ShaderToy
+### ShaderToy
 ShaderToy is a shader creation website and platform for browsing, sharing and discussing shaders.
 
-Create an account on ShaderToy (it's fast/easy/free) by heading here: https://www.shadertoy.com/signin. This will allow you to save your shader and ensure that you don't lose work.
+While you can jump straight in and start writing a new shader without creating an account, this is dangerous as you can easily lose work if there are connection issues or if you hang the GPU (easily done by e.g. creating an infinite loop).
+Therefore we strongly recommend creating an account (it's fast/easy/free) by heading here: https://www.shadertoy.com/signin, and saving regularly.
 
-To get started, we recomend following a tutorial such as this one from @The_ArtOfCode: https://www.youtube.com/watch?v=u5HAYVHsasc. The basics here are necessary to follow the rest of the workshop.
+For a ShaderToy overview and getting started guide, we recomend following a tutorial such as this one from [@The_ArtOfCode](https://twitter.com/the_artofcode): https://www.youtube.com/watch?v=u5HAYVHsasc. The basics here are necessary to follow the rest of the workshop.
 
 
 ### 2D SDF demo
 
 We provide a simple framework for defining and visualizing 2D signed distance fields.
 
-https://www.shadertoy.com/view/llcBD2
+https://www.shadertoy.com/view/Wsf3Rj
 
-This can look like the following when filled in. Green denotes 'outside' surfaces, red denotes 'inside' surfaces, the white line delineates the surface itself, and the shading in the inside/outside regions illustrates distance iso-lines - lines at fixed distances.
-
-![](/assets/0-SDF-demo.jpg)
-
-The goal of this section is to design a SDF that gives the desired scene shape (white outline). In code this distance is computed by the `sdf()` function, which is provided a 2D position in space. The concepts you learn here will generalise directly to 3D space and will allow you to model a 3D scene.
+Prior to defining the distance field the result will be entirely white. The goal of this section is to design an SDF that gives the desired scene shape (white outline). In code this distance is computed by the `sdf()` function, which is given a 2D position in space as input. The concepts you learn here will generalise directly to 3D space and will allow you to model a 3D scene.
 
 Start simple - try first to just use the x or y component of the point `p` and observe the result:
 
@@ -87,11 +84,19 @@ float sdf(vec2 p)
 }
 ```
 
-What kind of scene does this simple distance field represent?
+The result should look as follows:
+
+![](/assets/0-SDF-horizontal.png)
+
+Green denotes 'outside' surfaces, red denotes 'inside' surfaces, the white line delineates the surface itself, and the shading in the inside/outside regions illustrates distance iso-lines - lines at fixed distances. In 2D this SDF models a horizontal line in 2D at `y=0`. What sort of geometric primitive would this represent in 3D?
 
 Another good thing to try is to use distances, for example: `return length(p);`. This operator returns the magnitude of the vector, and in this case it's giving us the current point's distance to the origin.
 
-A point is not a very interesting thing to render as a point is infinitesimal, and our rays would always miss it. We can give the point some area by subtracting the desired radius from the distance: `return length(p) - 0.25;`. A final extension is to change the point from which we compute the distance: `length(p - vec3(0.0, 0.2, 0.0)) - 0.25;`. What effect does this have on the shape? What values might the function be returning for points 'inside' the circle?
+A point is not a very interesting thing to render as a point is infinitesimal, and our rays would always miss it!
+We can give the point some area by subtracting the desired radius from the distance: `return length(p) - 0.25;`.
+We can also modify the input point prior to taking its magnitude: `length(p - vec3(0.0, 0.2, 0.0)) - 0.25;`.
+What effect does this have on the shape?
+What values might the function be returning for points 'inside' the circle?
 
 Congratulations - you have just modelled a circle using mathematics :). This will trivially extend to 3D in which case it models a sphere. Contrast this scene representation to other 'explicit' scenes representations such as triangle meshes or NURBS surfaces. We created a sphere in minutes with a single line of code, and our code directly maps to one mathematical definition for a sphere - 'the set of all points that are equidistant from a center point'.
 
@@ -122,14 +127,18 @@ In this way we can compactly combine many shapes. Once this is understood, the `
 
 This is only scratching the surface of what is possible. We can get smooth blends using a fancy soft min function - try using the provided `opBlend()`. There are many other interesting techniques that can be applied, the interested reader is referred to this extended introduction to building scenes with SDFs: https://www.youtube.com/watch?v=s8nFqwOho-s
 
+Example:
 
-## 1. Transition to 3D
+![](/assets/0-SDF-demo.jpg)
+
+
+## Transition to 3D
 Hopefully you've gained a basic understanding of how distance fields can be used to represent scene data, and how we'll use raymarching to find intersection points with the scene. We're now going to start working in three dimensions, where the real magic happens.
 
 We reccommend saving your current shader and starting a new one so that you can refer back to your 2D visualization later. Most of the helpers can copied into your new shader and made to work in 3D by swapping the `vec2`s with `vec3`s.
 
-### 1.a. Ray marching loop
-Rather than visualize the SDF like we did in 2D, we're going to jump right in to rendering the scene. Here's the basic idea of how we'll implement ray marching (in pseudo code):
+### Ray marching loop
+Rather than visualise the SDF like we did in 2D, we're going to jump right in to rendering the scene. Here's the basic idea of how we'll implement ray marching (in pseudo code):
 
 ```
 Main
@@ -143,7 +152,7 @@ Render ray
 
 These steps will now each be described in more detail.
 
-### 1.b. Camera
+### Camera
 ```cpp
 vec3 getCameraRayDir(vec2 uv, vec3 camPos, vec3 camTarget)
 {
@@ -163,7 +172,7 @@ This function calculates the three axes of the camera's 'view' matrix (forward, 
 
 `fPersp` allows us to indirectly control our camera's field of view. You can think of this multiplication as moving the near plane closer and farther from the camera. Experiment with different values.
 
-### 1.c. Define scene
+### Scene definition
 ```cpp
 float sdSphere(vec3 p, float r)
 {
@@ -180,7 +189,7 @@ float sdf(vec3 pos)
 
 As you can see, we've added a `sdSphere()` which is identical to `sdCircle` save for the number of components in our input point.
 
-### 1.d. Raymarching
+### Raymarching
 Pseudo code:
 
 ```cpp
@@ -235,7 +244,7 @@ vec2 screenToWorld(vec2 screenCoord)
 
 
 
-### 1.e. Depth
+### Depth
 Lets display the distance to the scene to check we're on track. We'll scale and invert it to better see the differences.
 
 ```cpp
@@ -248,7 +257,7 @@ https://www.shadertoy.com/view/XltBzj
 
 
 
-### 1.f. Ambient
+### Ambient term
 To get some colour into the scene we're first going to differentiate between objects and the background.
 
 To do this, we can return -1 in castRay to signal nothing was hit. We can then handle that case in render.
@@ -280,7 +289,7 @@ https://www.shadertoy.com/view/4tdBzj
 
 
 
-### 1.g. Shading (diffuse)
+### Diffuse term
 To get more realistic lighting let's calculate the surface normal so we can calculate basic Lambertian lighting.
 
 To calculate the normal, we are going to calculate the gradient of the surface in all three axes.
@@ -364,7 +373,7 @@ float sdPlane(vec3 p, vec4 n)
 }
 ```
 
-### Soft Shadows
+### Soft shadows
 Shadows in real life don't immediately stop, they have some falloff, referred to as a penumbra. 
 
 We can model this by taking marching several rays from our surface point, each with slightly different directions.
@@ -403,11 +412,11 @@ for (float s = 0.0; s < shadowRayCount; s++)
 col = mix(col, col*0.2, shadow/shadowRayCount);
 ```
 
-## 2 Texturing
+## Texture mapping
 Rather than define a single surface colour (or other characteristic) uniformly over the entire surface, one can define patterns to apply to the surface using textures.
 We'll cover three ways of achieving this.
 
-### 3D
+### 3D Texture mapping
 There are volume textures readily accessible in shadertoy that can be assigned to a channel. Try sampling one of these textures using the 3D position of the surface point:
 
 // assign a 3D noise texture to iChannel0 and then sample based on world position
@@ -429,7 +438,7 @@ The constants/weights above are typically used for a fractal noise, but they can
 
 Try animating your object using iTime and observing how the volume texture behaves. Can this behaviour be changed?
 
-### 2D
+### 2D Texture mapping
 Applying a 2D texture is an interesting problem - how to project the texture onto the surface? In normal 3D graphics, each triangle in an object has one or more UVs assigned which provide the coordinates of the region of texture which should me mapped to the triangle (texture mapping). In our case we don't have UVs provided so we need to figure out how to sample the texture.
 
 One approach is to sample the texture using a top down world projection, by sampling the texture based on X & Z coordinates:
@@ -444,7 +453,7 @@ What limitations do you see with this approach?
 
 
 
-### Triplanar Mapping
+### Triplanar mapping
 
 A more advanced way to map textures is to do 3 projections from the primary axes, and then blend the result using triplanar mapping. The goal of the blending is to pick the best texture for each point on the surface. One possibility is to define the blend weights based on the alignment of the surface normal with each world axis. A surface that faces front on with one of the axes will receive a large blend weight:
 
@@ -468,7 +477,7 @@ vec3 triplanarMap(vec3 surfacePos, vec3 normal)
 What limitations do you see with this approach?
 
 
-## 3. Materials
+## Materials
 Along with the distance we return from the castRay function, we can also return an index which represents the material of the object hit. We can use this index to colour objects accordingly.
 
 Our operators will need to take vec2s rather than floats, and compare the first component of each.
@@ -541,7 +550,6 @@ vec2 opBlend(vec2 d1, vec2 d2)
 
 ![](/assets/3-blending.png)
 
-## Advanced techniques
 ### Anti-aliasing
 By sampling the scene many times with slightly offset camera direction vectors, we can get an smoothed value which avoids aliasing.
 
@@ -612,7 +620,7 @@ Darker and lighter values can be accentuated, causing the perceived dynamic rang
 col = smoothstep(0.0,1.0,col);
 ```
 
-### "Ambient Occlusion"
+### "Ambient occlusion"
 If we take the inverse of the image shown above (in Optimizations), we can get a weird AO-like effect.
 
 ```cpp
@@ -643,7 +651,7 @@ Also give the references a read through if you're interested in learning more!
 
 
 
-Thanks for participating! Be sure to send me your cool shaders! If you have any feedback on the course I'd also love to hear it!
+Thanks for reading! Be sure to send us your cool shaders! If you have any feedback on the course we'd also love to hear it!
 
 Contact us on twitter [@liqwidice](https://twitter.com/liqwidice) & [@hdb1](https://twitter.com/hdb1)
 
