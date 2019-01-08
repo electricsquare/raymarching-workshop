@@ -643,13 +643,11 @@ We've just covered the basics here; there is much more to be explored in this fi
 - Optimizations (bounding volume hierarchies)
 - ...
 
-Browse ShaderToy to get some inspiration about what can be done and poke through various shaders to see how different effects are implemented.
-
-Many shaders have variables which you can tweak and instantly see the effects of (alt-enter is the shortcut to compile!).
+Browse ShaderToy to get some inspiration about what can be done and poke through various shaders to see how different effects are implemented. Many shaders have variables which you can tweak and instantly see the effects of (alt-enter is the shortcut to compile!).
 
 Also give the references a read through if you're interested in learning more!
 
-
+---
 
 Thanks for reading! Be sure to send us your cool shaders! If you have any feedback on the course we'd also love to hear it!
 
