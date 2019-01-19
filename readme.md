@@ -419,9 +419,12 @@ We'll cover three ways of achieving this.
 ### 3D Texture mapping
 There are volume textures readily accessible in shadertoy that can be assigned to a channel. Try sampling one of these textures using the 3D position of the surface point:
 
+```cpp
 // assign a 3D noise texture to iChannel0 and then sample based on world position
 float textureFreq = 0.5;
 vec3 surfaceCol = texture(iChannel0, textureFreq * surfacePos).xyz;
+```
+
 One way to sample noise is to add together multiple scales, using something like the following:
 
 ```cpp
@@ -443,12 +446,15 @@ Applying a 2D texture is an interesting problem - how to project the texture ont
 
 One approach is to sample the texture using a top down world projection, by sampling the texture based on X & Z coordinates:
 
+```cpp
 // top down projection
 float textureFreq = 0.5;
 vec2 uv = textureFreq * surfacePos.xz;
  
 // sample texture
 vec3 surfaceCol = texture2D(iChannel0, uv).xyz;
+```
+
 What limitations do you see with this approach?
 
 
