@@ -223,38 +223,69 @@ float castRay(vec3 rayOrigin, vec3 rayDir)
 }
 ```
 
-For full working program, see Shadertoy: Part 1
-
-
-
-We'll add a simple helper transform the screen-space pixel coordinate. We'll flip the y coordinate and bring the range from [0, 1] into [-1, 1].
+We'll now add a `render` function, which will eventually be responsible for shading the found intersection point. For now however, lets display the distance to the scene to check we're on track. We'll scale and invert it to better see the differences.
 
 ```cpp
-vec2 screenToWorld(vec2 screenCoord)
+vec3 render(vec3 rayOrigin, vec3 rayDir)
+{
+    float t = castRay(rayOrigin, rayDir);
+    
+    // Visualize depth
+    vec3 col = vec3(1.0-t*0.075);
+    
+    return col;
+}
+```
+
+To calculate the each ray's direction, we'll add two simple helpers. One will transform the screen-space pixel coordinates in range `[0, w), [0, h)` into the range `[-a, a], [-1, 1]`, where `a` is the aspect ratio of the screen. The second helper will compute a ray direction given the value computed in the first helper, along with some info about the camera.
+
+```cpp
+vec2 normalizeScreenCoords(vec2 screenCoord)
 {
     vec2 result = 2.0 * (screenCoord/iResolution.xy - 0.5);
-    result.x *= iResolution.x/iResolution.y;
+    result.x *= iResolution.x/iResolution.y; // Correct for aspect ratio
     return result;
 }
 ```
 
-**Exercises:**
-- Experiment with the step count and observe how result degrades.
-- Experiment with the termination threshold and observe how result degrades.
-
-
-
-### Depth
-Lets display the distance to the scene to check we're on track. We'll scale and invert it to better see the differences.
-
 ```cpp
-vec3 col = vec3(1.0-dist*0.075);
+vec3 getCameraRayDir(vec2 uv, vec3 camPos, vec3 camTarget)
+{
+    vec3 camForward = normalize(camTarget - camPos);
+    vec3 camRight = normalize(cross(vec3(0.0, 1.0, 0.0), camForward));
+    vec3 camUp = normalize(cross(camForward, camRight));
+    
+    float fPersp = 2.0;
+    vec3 vDir = normalize(uv.x * camRight + uv.y * camUp + camForward * fPersp);
+    
+    return vDir;
+}
 ```
 
-![](/assets/0-depth.png)
+In our main image function, we can then use these helpers to compute the final color of the pixel:
 
-https://www.shadertoy.com/view/XltBzj
+```cpp
+void mainImage(out vec4 fragColor, vec2 fragCoord)
+{
+    vec3 camPos = vec3(0, 0, -1);
+    vec3 at = vec3(0, 0, 0);
+    
+    vec2 uv = normalizeScreenCoords(fragCoord);
+    vec3 rayDir = getCameraRayDir(uv, camPos, at);   
+    
+    vec3 col = render(camPos, rayDir);
+    
+    fragColor = vec4(col,1.0); // Output to screen
+}
+```
 
+**Exercises:**
+- Experiment with the step count and observe how result changes.
+- Experiment with the termination threshold and observe how result changes.
+
+![](/assets/1-depth.png)
+
+For full working program, see Shadertoy: [Part 1a](https://www.shadertoy.com/view/XltBzj)
 
 
 ### Ambient term
@@ -283,7 +314,7 @@ vec3 render(vec3 rayOrigin, vec3 rayDir)
     return col;
 }
 ```
-![](/assets/0-ambient.png)
+![](/assets/1-ambient.png)
 
 https://www.shadertoy.com/view/4tdBzj
 
