@@ -135,18 +135,19 @@ Example:
 ## Transition to 3D
 Hopefully you've gained a basic understanding of how distance fields can be used to represent scene data, and how we'll use raymarching to find intersection points with the scene. We're now going to start working in three dimensions, where the real magic happens.
 
-We reccommend saving your current shader and starting a new one so that you can refer back to your 2D visualization later. Most of the helpers can copied into your new shader and made to work in 3D by swapping the `vec2`s with `vec3`s.
+We recommend saving your current shader and starting a new one so that you can refer back to your 2D visualization later.
+Most of the helpers can copied into your new shader and made to work in 3D by swapping the `vec2`s with `vec3`s.
 
 ### Ray marching loop
 Rather than visualise the SDF like we did in 2D, we're going to jump right in to rendering the scene. Here's the basic idea of how we'll implement ray marching (in pseudo code):
 
 ```
-Main
+Main function
     Evaluate camera
-    Render ray
+    Call RenderRay
 
-Render ray
-    Raymarch to find intersection
+RenderRay function
+    Raymarch to find intersection of ray with scene
     Shade
 ```
 
@@ -168,20 +169,24 @@ vec3 getCameraRayDir(vec2 uv, vec3 camPos, vec3 camTarget)
 }
 ```
 
-This function calculates the three axes of the camera's 'view' matrix (forward, right, and up vectors), and then uses them to calculate the direction of the ray for the current pixel (located at `uv` in screen-space).
+This function first calculates the three axes of the camera's 'view' matrix; the forward, right, and up vectors.
+The forward vector is the normalized vector from the camera position to the look target position.
+The right vector is found by crossing the forward vector with the world up axis.
+The forward and right vectors are then crossed to obtain the camera up vector.
 
-`fPersp` allows us to indirectly control our camera's field of view. You can think of this multiplication as moving the near plane closer and farther from the camera. Experiment with different values.
+Finally the camera ray is computed using this frame by taking a point in front of the camera and offsetting it in the camera right and up directions using the pixel coordinates `uv`.
+`fPersp` allows us to indirectly control our camera's field of view. You can think of this multiplication as moving the near plane closer and farther from the camera. Experiment with different values to see the result.
 
 ### Scene definition
 ```cpp
 float sdSphere(vec3 p, float r)
 {
-    return length(p)-r;
+    return length(p) - r;
 }
  
 float sdf(vec3 pos)
 {
-    float t = sdSphere(pos-vec3(0,0,10), 3.0);
+    float t = sdSphere(pos-vec3(0.0, 0.0, 10.0), 3.0);
      
     return t;
 }
