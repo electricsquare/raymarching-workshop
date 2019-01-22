@@ -242,7 +242,7 @@ vec3 render(vec3 rayOrigin, vec3 rayDir)
 }
 ```
 
-To calculate the each ray's direction, we'll want to transform the screen-space pixel coordinate input (`fragCoord`), which in range `[0, w), [0, h)`, into the range `[-a, a], [-1, 1]`, where `a` is the aspect ratio of the screen. We can then pass this value into the `getCameraRayDir` function we defined above to get the ray direction.
+To calculate the each ray's direction, we'll want to transform the pixel coordinate input `fragCoord` from the range `[0, w), [0, h)` into `[-a, a], [-1, 1]`, where `w` and `h` are the width and height of the screen in pixels, and `a` is the aspect ratio of the screen. We can then pass the value returned from this helper into the `getCameraRayDir` function we defined above to get the ray direction.
 
 ```cpp
 vec2 normalizeScreenCoords(vec2 screenCoord)
@@ -259,14 +259,14 @@ Our main image function then looks as follows:
 void mainImage(out vec4 fragColor, vec2 fragCoord)
 {
     vec3 camPos = vec3(0, 0, -1);
-    vec3 at = vec3(0, 0, 0);
+    vec3 camTarget = vec3(0, 0, 0);
     
     vec2 uv = normalizeScreenCoords(fragCoord);
-    vec3 rayDir = getCameraRayDir(uv, camPos, at);   
+    vec3 rayDir = getCameraRayDir(uv, camPos, camTarget);   
     
     vec3 col = render(camPos, rayDir);
     
-    fragColor = vec4(col,1.0); // Output to screen
+    fragColor = vec4(col, 1); // Output to screen
 }
 ```
 
@@ -316,7 +316,7 @@ To get more realistic lighting let's calculate the surface normal so we can calc
 
 To calculate the normal, we are going to calculate the gradient of the surface in all three axes.
 
-What this means in practice is sampling the SDF four extra times with slightly offset directions from out primary ray, and using that info to determine the normal.
+What this means in practice is sampling the SDF four extra times, each slightly offset from our primary ray.
 
 ```cpp
 vec3 calcNormal(vec3 pos)
@@ -329,7 +329,7 @@ vec3 calcNormal(vec3 pos)
 }
 ```
 
-One great way to inspect normals is by displaying them as though they represented color. This is what a sphere should look like when displaying its scaled and biased normal (brought from [-1, 1] into [0, 1])
+One great way to inspect normals is by displaying them as though they represented color. This is what a sphere should look like when displaying its scaled and biased normal (brought from `[-1, 1]` into `[0, 1]` since your monitor can't display negative colour values)
 
 ```cpp
 col = N * vec3(0.5) + vec3(0.5);
