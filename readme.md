@@ -669,10 +669,12 @@ If we take the inverse of the image shown above (in Optimizations), we can get a
 col *= (1.0-vec3(steps/maxSteps));
 ```
 
+---
+
 ### Ad infinitum
 As you can see, many post processing effects can implemented trivially; play around with different functions and see what other effects you can create.
 
-![https://www.shadertoy.com/view/MtdBzs](/assets/raymarching-weeks-03.gif)
+![](/assets/raymarching-weeks-03.gif)
 [www.shadertoy.com/view/MtdBzs](https://www.shadertoy.com/view/MtdBzs)
 
 ## What's next?
