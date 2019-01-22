@@ -242,7 +242,7 @@ vec3 render(vec3 rayOrigin, vec3 rayDir)
 }
 ```
 
-To calculate the each ray's direction, we'll add two simple helpers. One will transform the screen-space pixel coordinates in range `[0, w), [0, h)` into the range `[-a, a], [-1, 1]`, where `a` is the aspect ratio of the screen. The second helper will compute a ray direction given the value computed in the first helper, along with some info about the camera.
+To calculate the each ray's direction, we'll want to transform the screen-space pixel coordinate input (`fragCoord`), which in range `[0, w), [0, h)`, into the range `[-a, a], [-1, 1]`, where `a` is the aspect ratio of the screen. We can then pass this value into the `getCameraRayDir` function we defined above to get the ray direction.
 
 ```cpp
 vec2 normalizeScreenCoords(vec2 screenCoord)
@@ -253,21 +253,7 @@ vec2 normalizeScreenCoords(vec2 screenCoord)
 }
 ```
 
-```cpp
-vec3 getCameraRayDir(vec2 uv, vec3 camPos, vec3 camTarget)
-{
-    vec3 camForward = normalize(camTarget - camPos);
-    vec3 camRight = normalize(cross(vec3(0.0, 1.0, 0.0), camForward));
-    vec3 camUp = normalize(cross(camForward, camRight));
-    
-    float fPersp = 2.0;
-    vec3 vDir = normalize(uv.x * camRight + uv.y * camUp + camForward * fPersp);
-    
-    return vDir;
-}
-```
-
-In our main image function, we can then use these helpers to compute the final color of the pixel:
+Our main image function then looks as follows:
 
 ```cpp
 void mainImage(out vec4 fragColor, vec2 fragCoord)
