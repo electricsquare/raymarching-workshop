@@ -94,7 +94,7 @@ Another good thing to try is to use distances, for example: `return length(p);`.
 
 A point is not a very interesting thing to render as a point is infinitesimal, and our rays would always miss it!
 We can give the point some area by subtracting the desired radius from the distance: `return length(p) - 0.25;`.
-We can also modify the input point prior to taking its magnitude: `length(p - vec3(0.0, 0.2, 0.0)) - 0.25;`.
+We can also modify the input point prior to taking its magnitude: `length(p - vec3(0.0, 0.2)) - 0.25;`.
 What effect does this have on the shape?
 What values might the function be returning for points 'inside' the circle?
 
