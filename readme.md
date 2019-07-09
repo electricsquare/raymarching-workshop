@@ -16,13 +16,13 @@ This course introduces one technique for raycasting through 'distance fields'. A
 ### What's possible with ray marching?
 The game 'Claybook' solely uses distance fields to represent the scene. This affords it a lot of interesting possibilities, like completely dynamic surface topologies and shape morphing. These effects would be very difficult to achieve with triangle meshes. Other benefits include easy-to-implement and high-quality soft shadows and ambient occlusion.
 
-![](/assets/0-claybook-01.gif)
+![](assets/0-claybook-01.gif)
 
 https://www.claybookgame.com/
 
 The following image was also rendered in real-time using the techniques we'll cover today (plus many fancy techniques which we won't have time to dive into).
 
-![](/assets/0-snail.png)
+![](assets/0-snail.png)
 
 You can run it live in your browser here: https://www.shadertoy.com/view/ld3Gz2
 
@@ -41,7 +41,7 @@ As you can see, sampling the SDF doesn't give you the exact intersection point o
 
 Once this distance is below a certain threshold, the raymarch terminates the pixel can be shaded based on the properties of the surface intersected with.
 
-![](/assets/0-SDF.png)
+![](assets/0-SDF.png)
 
 Play around with this shader in your browser here: (click and drag in the image to set the ray direction) https://www.shadertoy.com/view/lslXD8
 
@@ -86,7 +86,7 @@ float sdf(vec2 p)
 
 The result should look as follows:
 
-![](/assets/0-SDF-horizontal.png)
+![](assets/0-SDF-horizontal.png)
 
 Green denotes 'outside' surfaces, red denotes 'inside' surfaces, the white line delineates the surface itself, and the shading in the inside/outside regions illustrates distance iso-lines - lines at fixed distances. In 2D this SDF models a horizontal line in 2D at `y=0`. What sort of geometric primitive would this represent in 3D?
 
@@ -129,7 +129,7 @@ This is only scratching the surface of what is possible. We can get smooth blend
 
 Example:
 
-![](/assets/0-SDF-demo.jpg)
+![](assets/0-SDF-demo.jpg)
 
 
 ## Transition to 3D
@@ -274,7 +274,7 @@ void mainImage(out vec4 fragColor, vec2 fragCoord)
 - Experiment with the step count and observe how result changes.
 - Experiment with the termination threshold and observe how result changes.
 
-![](/assets/1-depth.png)
+![](assets/1-depth.png)
 
 For full working program, see Shadertoy: [Part 1a](https://www.shadertoy.com/view/XltBzj)
 
@@ -305,7 +305,7 @@ vec3 render(vec3 rayOrigin, vec3 rayDir)
     return col;
 }
 ```
-![](/assets/1-ambient.png)
+![](assets/1-ambient.png)
 
 https://www.shadertoy.com/view/4tdBzj
 
@@ -334,7 +334,7 @@ One great way to inspect normals is by displaying them as though they represente
 ```cpp
 col = N * vec3(0.5) + vec3(0.5);
 ```
-![](/assets/1-normals.png)
+![](assets/1-normals.png)
 
 Now that we have a normal, we can take the dot product between it and the light direction.
 
@@ -354,7 +354,7 @@ One very important part of rendering which can easily be overlooked is gamma cor
 
 Because monitors don't operate in "linear" space, we need to compensate for their gamma curve prior to outputting a colour. The difference is very noticeable and should always be corrected for. In reality we don't know the gamma curve for a particular display device is, so the whole situation with display technology is an awful mess (hence the gamma tuning step in many games), but a common assumption is the following gamma curve:
 
-![](/assets/1-gamma.svg)
+![](assets/1-gamma.svg)
 
 The constant 0.4545 is simply 1.0 / 2.2
 
@@ -362,7 +362,7 @@ The constant 0.4545 is simply 1.0 / 2.2
 col = pow(col, vec3(0.4545)); // Gamma correction
 ```
 
-![](/assets/1-diffuse.png)
+![](assets/1-diffuse.png)
 
 https://www.shadertoy.com/view/4t3fzn
 
@@ -500,7 +500,7 @@ vec3 triplanarMap(vec3 surfacePos, vec3 normal)
 }
 ```
 
-![](/assets/2-triplanar.png)
+![](assets/2-triplanar.png)
 
 What limitations do you see with this approach?
 
@@ -542,7 +542,7 @@ float checkers(vec2 p)
 
 We'll pass in the xz components of our plane position to get the pattern to repeat in those dimensions.
 
-![](/assets/3-materials.png)
+![](assets/3-materials.png)
 
 https://www.shadertoy.com/view/Xl3fzn
 
@@ -551,7 +551,7 @@ We can add now fog to the scene based on how far each intersection occurred from
 
 See if you can get something similar to the following:
 
-![](/assets/3-fog.png)
+![](assets/3-fog.png)
 
 https://www.shadertoy.com/view/Xtcfzn
 
@@ -576,7 +576,7 @@ vec2 opBlend(vec2 d1, vec2 d2)
 }
 ```
 
-![](/assets/3-blending.png)
+![](assets/3-blending.png)
 
 ### Anti-aliasing
 By sampling the scene many times with slightly offset camera direction vectors, we can get an smoothed value which avoids aliasing.
@@ -605,8 +605,8 @@ This can give a significant performance boost for certain scenes.
 ```cpp
 if (t > drawDist) return backgroundColor;
 ```
-![](/assets/4-step-count-vis-0.png)
-![](/assets/4-step-count-vis-1.png)
+![](assets/4-step-count-vis-0.png)
+![](assets/4-step-count-vis-1.png)
 
 ### Shape & material interpolation
 We can interpolate between two shapes using the mix function and using iTime to modulate over time.
@@ -616,7 +616,7 @@ vec2 shapeA = vec2(sdBox(pos-vec3(6.5, -3.0, 8), vec3(1.5)), 1.5);
 vec2 shapeB = vec2(sdSphere(pos-vec3(6.5, -3.0, 8), 1.5),    3.0);
 res = opU(res, mix(shapeA, shapeB, sin(iTime)*0.5+0.5));
 ```
-![](/assets/4-shape-interp.gif)
+![](assets/4-shape-interp.gif)
 
 ### Domain repetition
 It's quite easy to repeat a shape using a signed distance field, essentially you just have to modulo the input position in one or more dimensions.
@@ -625,7 +625,7 @@ This technique can be used for example to repeat a column several times without 
 
 Here I've repeated all three components of the input position, then used the subtraction operator ( max() ) to limit the repetition to a bounding box.
 
-![](/assets/4-domain-rep.png)
+![](assets/4-domain-rep.png)
 
 One gotcha is that you need to subtract half of the value you are modulating by in order to center the repetition on your shape as to not cut it in half.
 
@@ -660,7 +660,7 @@ col *= (1.0-vec3(steps/maxSteps));
 ### Ad infinitum
 As you can see, many post processing effects can implemented trivially; play around with different functions and see what other effects you can create.
 
-![](/assets/raymarching-weeks-03.gif)
+![](assets/raymarching-weeks-03.gif)
 [www.shadertoy.com/view/MtdBzs](https://www.shadertoy.com/view/MtdBzs)
 
 ## What's next?
