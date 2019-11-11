@@ -4,6 +4,8 @@
 
 Brought to you by [Electric Square](https://www.electricsquare.com/)
 
+Created and presented by [AJ Weeks](https://twitter.com/liqwidice) & [Huw Bowles](https://twitter.com/hdb1)
+
 ### Overview
 Rendering an image involves determining the colour of every pixel in the image, which requires figuring out what surface lies behind the pixel in the world, and then 'shading' it to compute a final colour.
 
