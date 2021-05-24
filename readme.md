@@ -330,8 +330,10 @@ To do this, we can return -1 in castRay to signal nothing was hit. We can then h
 vec3 render(vec3 rayOrigin, vec3 rayDir)
 {
     vec3 col;
+    // t stores the distance the ray travelled before intersecting a surface
     float t = castRay(rayOrigin, rayDir);
  
+    // -1 means the ray didn't intersect anything, so render the skybox
     if (t == -1.0)
     {
         // Skybox colour
@@ -428,9 +430,8 @@ col = mix(col, col*0.2, shadow);
 ### Ground plane
 Let's add a ground plane so we can see shadows cast by our spheres better.
 
-The w component of n represents the distance the plane is from the origin.
-
 ```cpp
+// p: plane origin (position), n.xyz: plane surface normal, p.w: plane's distance from origin (along its normal)
 float sdPlane(vec3 p, vec4 n)
 {
     return dot(p, n.xyz) + n.w;
@@ -449,9 +450,10 @@ some rays hit, and others miss, giving a 50% darkness.
 Finding somewhat pseudo random number can be done a number of ways, we'll use the following though:
 
 ```cpp
-float rand(vec2 co)
+// Return a psuedo random value in the range [0, 1), seeded via coord
+float rand(vec2 coord)
 {
-  return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+  return fract(sin(dot(coord.xy, vec2(12.9898,78.233))) * 43758.5453);
 }
 ```
 
@@ -561,12 +563,70 @@ res = opU(res, vec2(sdSphere(pos-vec3(0, 2.5, 10), 2.5),     5.0));
 return res;
 ```
 
+This requires the operation functions to accept vec2s instead of floats. Here's the new version of the union operator:
+
+```cpp
+vec2 opU(vec2 d1, vec2 d2)
+{
+    return (d1.x < d2.x) ? d1 : d2;
+}
+```
+
+The new version of `castRay` tracks the material ID of the closest object at all times, so that when we decide we've hit a surface, we can return its material ID.
+
+```cpp
+// Returns a vec2, x: signed distance to surface, y: material ID
+vec2 castRay(vec3 rayOrigin, vec3 rayDir)
+{
+    float tmax = 250.0;
+    // t stores the distance the ray travelled before intersecting a surface
+    float t = 0.0;
+    
+    vec2 result;
+    result.y = -1.0; // Default material ID
+    
+    for (int i = 0; i < 256; i++)
+    {
+        vec2 res = SDF(rayOrigin + rayDir * t);
+        if (res.x < (0.0001*t))
+        {
+            // When within a small distance of the surface, count it as an intersection
+            result.x = t;
+            return result;
+        }
+        else if (res.x > tmax)
+        {
+            // Indicate that this ray didn't intersect anything
+            result.y = -1.0;
+            result.x = -1.0;
+            return result;
+        }
+        t += res.x;
+        result.y = res.y; // Material ID of closest object
+    }
+    
+    result.x = t; // Distance to intersection
+    return result;
+}
+```
+
+Our `render` function can change to extract both fields now returned from `castRay` as follows:
+
+```cpp
+vec2 res = castRay(rayOrigin, rayDir);
+float t = res.x; // Distance to surface
+float m = res.y; // Material ID
+```
+
 We can then multiply this material index by some values in the render function to get different colours for each object. Try different values out.
 
 ```cpp
+// m just stores some material identifier, here we're arbitrarily modifying it
+// just to get some different colour values per object
 col = vec3(0.18*m, 0.6-0.05*m, 0.2)
 if (m == 2.0)
 {
+  // Apply triplanar mapping only to objects with material ID 2
     col *= triplanarMap(pos, N, 0.6);
 }
 ```
