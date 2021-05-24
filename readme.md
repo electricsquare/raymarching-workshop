@@ -6,6 +6,46 @@ Brought to you by [Electric Square](https://www.electricsquare.com/)
 
 Created and presented by [AJ Weeks](https://twitter.com/liqwidice) & [Huw Bowles](https://twitter.com/hdb1)
 
+<details>
+<summary>Table of Contents</summary>
+<br>
+
+- [Overview](#overview)
+  - [Raymarching](#raymarching-distance-fields)
+- [Let's begin!](#lets-begin)
+  - [2D SDF demo](#2d-sdf-demo)
+  - [Combining shapes](#combining-shapes)
+- [Transition to 3D](#transition-to-3d)
+  - [Raymarching loop](#raymarching-loop)
+  - [Camera](#camera)
+  - [Scene definition](#scene-definition)
+  - [Raymarching](#raymarching)
+  - [Ambient term](#ambient-term)
+  - [Diffuse term](#diffuse-term)
+  - [Shadows](#shadows)
+  - [Ground plane](#ground-plane)
+  - [Soft shadows](#soft-shadows)
+- [Texture mapping](#texture-mapping)
+  - [3D Texture mapping](#3d-texture-mapping)
+  - [2D Texture mapping](#2d-texture-mapping)
+  - [Triplanar mapping](#triplanar-mapping)
+- [Materials](#materials)
+- [Fog](#fog)
+- [Anti-aliasing](#anti-aliasing)
+- [Step count optimization](#step-count-optimization)
+- [Shape and material interpolation](#shape-and-material-interpolation)
+- [Domain repetition](#domain-repetition)
+- [Post processing effects](#post-processing-effects)
+  - [Vignette](#vignette)
+  - [Contrast](#contrast)
+  - [Ambient occlusion](#ambient-occlusion)
+- [What's next?](#whats-next)
+- [Glossary of terms](#glossary-of-terms)
+    
+</details>
+
+[//]: <> (TOC created with https://github.com/Lirt/markdown-toc-bash)
+
 ### Overview
 Rendering an image involves determining the colour of every pixel in the image, which requires figuring out what surface lies behind the pixel in the world, and then 'shading' it to compute a final colour.
 
@@ -15,7 +55,7 @@ An alternative approach is to cast a ray through each pixel and intersect it wit
 
 This course introduces one technique for raycasting through 'distance fields'. A distance field is a function that returns how close a given point is to the closest surface in the scene. This distance defines the radius of a sphere of empty space around each point. Signed distance fields (SDFs) are distance fields that are defined both inside and outside objects; if the queried position is 'inside' a surface, its distance will be reported as negative, otherwise it will be positive.
 
-### What's possible with ray marching?
+### What's possible with raymarching?
 The game 'Claybook' solely uses distance fields to represent the scene. This affords it a lot of interesting possibilities, like completely dynamic surface topologies and shape morphing. These effects would be very difficult to achieve with triangle meshes. Other benefits include easy-to-implement and high-quality soft shadows and ambient occlusion.
 
 ![](assets/0-claybook-01.gif)
@@ -140,8 +180,8 @@ Hopefully you've gained a basic understanding of how distance fields can be used
 We recommend saving your current shader and starting a new one so that you can refer back to your 2D visualization later.
 Most of the helpers can copied into your new shader and made to work in 3D by swapping the `vec2`s with `vec3`s.
 
-### Ray marching loop
-Rather than visualise the SDF like we did in 2D, we're going to jump right in to rendering the scene. Here's the basic idea of how we'll implement ray marching (in pseudo code):
+### Raymarching loop
+Rather than visualise the SDF like we did in 2D, we're going to jump right in to rendering the scene. Here's the basic idea of how we'll implement raymarching (in pseudo code):
 
 ```
 Main function
@@ -507,7 +547,7 @@ vec3 triplanarMap(vec3 surfacePos, vec3 normal)
 What limitations do you see with this approach?
 
 
-## Materials
+### Materials
 Along with the distance we return from the castRay function, we can also return an index which represents the material of the object hit. We can use this index to colour objects accordingly.
 
 Our operators will need to take vec2s rather than floats, and compare the first component of each.
@@ -558,7 +598,7 @@ See if you can get something similar to the following:
 https://www.shadertoy.com/view/Xtcfzn
 
 
-Shape & material blending
+Shape and material blending
 To avoid the harsh crease given by the min operator, we can use a more sophisticated operator which blends the shapes smoothly.
 
 ```cpp
@@ -610,7 +650,7 @@ if (t > drawDist) return backgroundColor;
 ![](assets/4-step-count-vis-0.png)
 ![](assets/4-step-count-vis-1.png)
 
-### Shape & material interpolation
+### Shape and material interpolation
 We can interpolate between two shapes using the mix function and using iTime to modulate over time.
 
 ```cpp
@@ -659,7 +699,6 @@ col *= (1.0-vec3(steps/maxSteps));
 
 ---
 
-### Ad infinitum
 As you can see, many post processing effects can implemented trivially; play around with different functions and see what other effects you can create.
 
 ![](assets/raymarching-weeks-03.gif)
@@ -705,3 +744,26 @@ Primitives reference: http://iquilezles.org/www/articles/distfunctions/distfunct
 Extended introduction to building scenes with SDFs: https://www.youtube.com/watch?v=s8nFqwOho-s
 
 Very realistic lighting & colours: http://www.iquilezles.org/www/articles/outdoorslighting/outdoorslighting.htm
+
+---
+
+## Glossary of terms
+
+Much of computer graphics & mathematics literature is littered with short, hard to comprehend variable names. We tried to keep our variable names clear yet concise to avoid confusion, but to provide further clarity we've defined in more detail what most variables map to.
+
+|Term|Description|
+|---|---|
+|shader|A piece of code that runs on the GPU, in this workshop we exclusively write fragment shaders, which (essentially) run once per pixel|
+|sdf|Signed distance field|
+|sd{Shape} (e.g. `sdCircle`)|A function that will compute the shortest (signed) distance to the surface of a {Shape}. The result will be 0 when at the surface, and negative when inside the shape.|
+|p/pos|Position, typically assumed to be in world space in this workshop|
+|op{X} (e.g. `opU`)|Operator that combines the results from multiple distance functions|
+|uv/fragCoord/screenCoord|Texture coordinate, used to describe how a texture (image) maps to geometry. In this workshop we mainly use a screen UV (which span the whole screen, going from 0 to 1 from the bottom left, to top right of the screen) to compute the ray direction.|
+|col|Stores a colour value as an RGB triplet|
+|fragColor|The final colour value produced by the shader, and therefore what gets displayed on screen.|
+|N|[Surface normal](https://mathworld.wolfram.com/NormalVector.html) (the unit vector perpendicular to a given surface)|
+|NoL|The result of the [dot product](https://mathworld.wolfram.com/DotProduct.html) between the normal & light vectors. Pronounced "N dot L". Produces a [cosine falloff](https://ogldev.org/www/tutorial18/tutorial18.html).|
+|i{Variable} (e.g. `iTime`)|An input provided by ShaderToy. View the descriptions of all inputs via the dropdown above the code window.|
+
+Functions like `abs`, `fwidth`, and `fract` are built-in functions provided via the graphics API. View their definitions here: https://www.khronos.org/registry/OpenGL-Refpages/gl4/index.php
+
