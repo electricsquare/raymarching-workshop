@@ -4,7 +4,7 @@
 
 Brought to you by [Electric Square](https://www.electricsquare.com/)
 
-Created and presented by [AJ Weeks](https://twitter.com/liqwidice) & [Huw Bowles](https://twitter.com/hdb1)
+Created and presented by [AJ Weeks](https://twitter.com/_ajweeks_) & [Huw Bowles](https://twitter.com/hdb1)
 
 <details>
 <summary>Table of Contents</summary>
@@ -783,7 +783,7 @@ Also give the references a read through if you're interested in learning more!
 
 Thanks for reading! Be sure to send us your cool shaders! If you have any feedback on the course we'd also love to hear it!
 
-Contact us on twitter [@liqwidice](https://twitter.com/liqwidice) & [@hdb1](https://twitter.com/hdb1)
+Contact us on twitter [@\_ajweeks\_](https://twitter.com/_ajweeks_) & [@hdb1](https://twitter.com/hdb1)
 
 [Electric Square](https://www.electricsquare.com/careers/) is hiring!
 
